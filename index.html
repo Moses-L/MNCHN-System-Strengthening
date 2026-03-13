@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bauchi MNCH+N Follow-Up Dashboard | EpiC Project</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0B1F3A;--blue:#1A5FA8;--sky:#2E86C1;--teal:#0E7C7B;--green:#1A8754;
+  --amber:#D4820A;--red:#C0392B;--purple:#6C3483;--lgray:#F4F6FA;--mgray:#DDE3ED;
+  --dgray:#8A97AB;--text:#1C2B3A;--cr:12px;--sh:0 2px 16px rgba(11,31,58,0.10);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:#EEF1F7;color:var(--text);min-height:100vh;}
+
+/* HEADER */
+.hdr{background:linear-gradient(135deg,var(--navy) 0%,#1A3A6E 60%,#1A5FA8 100%);position:sticky;top:0;z-index:200;box-shadow:0 4px 24px rgba(11,31,58,.30);}
+.hdr-top{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;border-bottom:1px solid rgba(255,255,255,.10);}
+.hdr-brand{display:flex;align-items:center;gap:14px;}
+.hdr-logo{width:52px;height:52px;border-radius:8px;background:#fff;padding:6px;object-fit:contain;}
+.hdr-titles h1{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:#fff;letter-spacing:.3px;line-height:1.2;}
+.hdr-titles p{font-size:11px;color:rgba(255,255,255,.65);margin-top:3px;letter-spacing:.4px;}
+.hdr-badges{display:flex;gap:8px;}
+.badge{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.9);padding:5px 13px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:.5px;}
+.badge.gr{background:rgba(26,135,84,.35);border-color:rgba(26,135,84,.5);}
+
+/* NAVIGATION */
+.nav{display:flex;gap:6px;padding:11px 28px;background:rgba(0,0,0,.08);backdrop-filter:blur(10px);overflow-x:auto;}
+.nav-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.75);padding:9px 17px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;}
+.nav-btn:hover{background:rgba(255,255,255,.15);color:#fff;}
+.nav-btn.active{background:rgba(255,255,255,.95);color:var(--navy);font-weight:600;}
+
+/* GLOBAL FILTER BAR */
+.gfbar{position:sticky;top:115px;z-index:190;background:linear-gradient(to bottom,#fff 0%,#F9FAFB 100%);border-bottom:1px solid var(--mgray);padding:13px 28px;display:flex;align-items:center;gap:11px;flex-wrap:wrap;box-shadow:0 2px 12px rgba(11,31,58,.06);}
+.gfbar label{font-size:12px;font-weight:600;color:var(--dgray);letter-spacing:.3px;}
+.chip{background:#fff;border:1.5px solid var(--mgray);padding:6px 15px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;color:var(--text);}
+.chip:hover{border-color:var(--blue);background:#F8FAFC;}
+.chip.active{background:var(--blue);border-color:var(--blue);color:#fff;}
+.gfbar select{padding:7px 13px;border:1.5px solid var(--mgray);border-radius:6px;font-size:12px;background:#fff;color:var(--text);font-weight:500;cursor:pointer;min-width:220px;}
+.filter-info{font-size:13px;color:var(--blue);font-weight:600;padding:5px 13px;background:rgba(26,95,168,.08);border-radius:6px;}
+.btn-reset{background:#fff;border:1.5px solid var(--mgray);padding:7px 15px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;color:var(--text);transition:all .2s;}
+.btn-reset:hover{background:var(--red);border-color:var(--red);color:#fff;}
+.sep{width:1px;height:25px;background:var(--mgray);}
+
+/* MAIN CONTENT */
+.main{padding:25px 28px;max-width:2000px;margin:0 auto;}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+.sec-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:21px;}
+.sec-title h2{font-family:'Playfair Display',serif;font-size:23px;font-weight:700;color:var(--navy);}
+.stag{background:var(--lgray);border:1px solid var(--mgray);padding:6px 15px;border-radius:6px;font-size:11px;font-weight:600;color:var(--dgray);letter-spacing:.5px;}
+
+/* GRID LAYOUTS */
+.g5,.g4,.g3,.g2{display:grid;gap:17px;margin-bottom:21px;}
+.g5{grid-template-columns:repeat(5,1fr);}
+.g4{grid-template-columns:repeat(4,1fr);}
+.g3{grid-template-columns:repeat(3,1fr);}
+.g2{grid-template-columns:repeat(2,1fr);}
+.sp2{grid-column:span 2;}
+
+/* KPI CARDS */
+.kpi{background:linear-gradient(135deg,#fff 0%,#F9FAFB 100%);padding:21px;border-radius:var(--cr);box-shadow:var(--sh);border:1px solid var(--mgray);}
+.kpi-lbl{font-size:11px;font-weight:600;color:var(--dgray);text-transform:uppercase;letter-spacing:.5px;margin-bottom:9px;}
+.kpi-val{font-size:33px;font-weight:700;color:var(--navy);line-height:1;margin-bottom:7px;}
+.kpi-sub{font-size:12px;color:var(--dgray);font-weight:500;}
+.kpi.G .kpi-val{color:var(--green);}
+.kpi.A .kpi-val{color:var(--amber);}
+.kpi.R .kpi-val{color:var(--red);}
+.kpi.B .kpi-val{color:var(--blue);}
+.kpi.T .kpi-val{color:var(--teal);}
+
+/* CARDS */
+.card{background:#fff;padding:21px;border-radius:var(--cr);box-shadow:var(--sh);border:1px solid var(--mgray);}
+.card-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:17px;padding-bottom:13px;border-bottom:1px solid var(--mgray);}
+.card-title-left{display:flex;align-items:center;gap:9px;font-weight:600;color:var(--navy);font-size:14px;}
+.dot{width:10px;height:10px;background:var(--blue);border-radius:50%;display:inline-block;}
+.n-badge{background:var(--lgray);padding:5px 11px;border-radius:6px;font-size:11px;font-weight:600;color:var(--dgray);}
+
+/* CHART FILTERS */
+.chart-filter-bar{display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin-bottom:17px;padding:11px;background:var(--lgray);border-radius:8px;}
+.chart-filter-bar label{font-size:11px;font-weight:600;color:var(--dgray);letter-spacing:.3px;}
+.cf-chip{background:#fff;border:1.5px solid var(--mgray);padding:5px 13px;border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;transition:all .2s;}
+.cf-chip:hover{border-color:var(--blue);}
+.cf-chip.active{background:var(--blue);border-color:var(--blue);color:#fff;}
+
+/* CHARTS */
+.cw{margin:0 auto;max-width:100%;}
+.cw-400{height:400px;}
+.cw-360{height:360px;}
+.cw-300{height:300px;}
+.cw-280{height:280px;}
+.cw-240{height:240px;}
+
+/* MAP */
+#mapContainer{height:600px;border-radius:var(--cr);overflow:hidden;box-shadow:0 8px 32px rgba(11,31,58,.18);}
+
+/* TABLES */
+table{width:100%;border-collapse:collapse;font-size:12px;}
+table thead{background:var(--lgray);font-weight:600;color:var(--navy);}
+table th,table td{padding:11px;text-align:left;border-bottom:1px solid var(--mgray);}
+table tbody tr:hover{background:var(--lgray);}
+.status-badge{padding:4px 11px;border-radius:6px;font-size:10px;font-weight:600;letter-spacing:.3px;display:inline-block;}
+.status-excellent{background:rgba(26,135,84,.15);color:var(--green);}
+.status-good{background:rgba(14,124,123,.15);color:var(--teal);}
+.status-fair{background:rgba(212,130,10,.15);color:var(--amber);}
+.status-critical{background:rgba(192,57,43,.15);color:var(--red);}
+.status-yes{background:rgba(26,135,84,.15);color:var(--green);padding:4px 9px;border-radius:5px;font-size:10px;font-weight:600;}
+.status-no{background:rgba(192,57,43,.15);color:var(--red);padding:4px 9px;border-radius:5px;font-size:10px;font-weight:600;}
+
+@media(max-width:1400px){.g5{grid-template-columns:repeat(3,1fr);}.g4{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:900px){.g5,.g4,.g3,.g2{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-top">
+    <div class="hdr-brand">
+      <img src="https://raw.githubusercontent.com/Moses-L/mnchlogo/main/mnch%20logo.jpg"
+           alt="MNCH Logo"
+           style="height:56px;width:auto;object-fit:contain;border-radius:6px;background:#fff;padding:3px;">
+      <div class="hdr-titles">
+        <h1>Follow-Up Visits & Health System Strengthening [MNCH+N]</h1>
+        <p>EpiC Project | Activity Period March 2026</p>
+      </div>
+    </div>
+    <div class="hdr-badges">
+      <span class="badge" id="totalBadge">29 Facilities</span>
+      <span class="badge gr">12 LGAs</span>
+      <span class="badge" id="typeBadge">26 PHC · 3 Secondary Facility</span>
+    </div>
+  </div>
+  <nav class="nav">
+    <button class="nav-btn active" onclick="switchTab('overview',this)">📊 Overview</button>
+    <button class="nav-btn" onclick="switchTab('gismap',this)">🗺️ GIS Map</button>
+    <button class="nav-btn" onclick="switchTab('nutrition',this)">🥦 Nutrition</button>
+    <button class="nav-btn" onclick="switchTab('anc',this)">🤱 ANC & Malaria</button>
+    <button class="nav-btn" onclick="switchTab('delivery',this)">👶 Delivery & Newborn</button>
+    <button class="nav-btn" onclick="switchTab('immunization',this)">💉 Immunization</button>
+    <button class="nav-btn" onclick="switchTab('quality',this)">📋 Quality & Data</button>
+    <button class="nav-btn" onclick="switchTab('gaps',this)">⚠️ Gaps & Actions</button>
+    <button class="nav-btn" onclick="switchTab('tables',this)">📑 Facility Tables</button>
+  </nav>
+</header>
+
+<div class="gfbar">
+  <label>Facility Type</label>
+  <span class="chip active" onclick="filterByType('all',this)">All Facilities</span>
+  <span class="chip" onclick="filterByType('secondary',this)">Secondary Only</span>
+  <span class="chip" onclick="filterByType('phc',this)">PHC Only</span>
+  
+  <span class="sep"></span>
+  <label>Select Facility</label>
+  <select id="facilityFilter" onchange="filterByFacility()">
+    <option value="all">All Facilities (29)</option>
+    <optgroup label="── Secondary Facilities ──" id="secondaryGroup"></optgroup>
+    <optgroup label="── PHC Facilities ──" id="phcGroup"></optgroup>
+  </select>
+  
+  <span class="sep"></span>
+  <label>LGA</label>
+  <select id="lgaFilter" onchange="filterByLGA()">
+    <option value="all">All LGAs</option>
+  </select>
+  
+  <span class="sep"></span>
+  <span class="filter-info" id="filterInfo">29 facilities selected</span>
+  <button class="btn-reset" onclick="resetFilters()">↺ Reset</button>
+</div>
+
+<main class="main">
+
+<!-- TAB: OVERVIEW -->
+<div class="tab-panel active" id="tab-overview">
+  <div class="sec-title">
+    <h2>Follow-Up Visit Summary</h2>
+    <span class="stag">Gap Bridging Progress</span>
+  </div>
+  
+  <div class="g5">
+    <div class="kpi G">
+      <div class="kpi-lbl">Facilities Visited</div>
+      <div class="kpi-val" id="kpi-facilities">29</div>
+      <div class="kpi-sub">Across 12 LGAs</div>
+    </div>
+    <div class="kpi B">
+      <div class="kpi-lbl">Avg Performance</div>
+      <div class="kpi-val" id="kpi-readiness">82.5%</div>
+      <div class="kpi-sub">Follow-up score</div>
+    </div>
+    <div class="kpi G">
+      <div class="kpi-lbl">ANC1 Attendance</div>
+      <div class="kpi-val" id="kpi-anc1">2,411</div>
+      <div class="kpi-sub">This month</div>
+    </div>
+    <div class="kpi A">
+      <div class="kpi-lbl">ANC4+ Coverage</div>
+      <div class="kpi-val" id="kpi-anc4">41.7%</div>
+      <div class="kpi-sub">Target: 60%</div>
+    </div>
+    <div class="kpi G">
+      <div class="kpi-lbl">Deliveries</div>
+      <div class="kpi-val" id="kpi-deliveries">1,683</div>
+      <div class="kpi-sub">Last month</div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card sp2">
+      <div class="card-title">
+        <div class="card-title-left"><span class="dot"></span><span id="perfTitle">Facility Performance</span></div>
+        <span class="n-badge" id="perfBadge">29 Facilities</span>
+      </div>
+      <div class="chart-filter-bar">
+        <label>Sort</label>
+        <span class="cf-chip active" onclick="sortPerf('desc',this)">↓ Performance</span>
+        <span class="cf-chip" onclick="sortPerf('asc',this)">↑ Performance</span>
+        <span class="cf-chip" onclick="sortPerf('name',this)">A–Z</span>
+      </div>
+      <div class="cw cw-400"><canvas id="perfChart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="g3">
+    <div class="card">
+      <div class="card-title">
+        <div class="card-title-left"><span class="dot"></span>Performance Distribution</div>
+      </div>
+      <div class="cw cw-280"><canvas id="readinessPie"></canvas></div>
+    </div>
+    
+    <div class="card">
+      <div class="card-title">
+        <div class="card-title-left"><span class="dot"></span>Indicators vs Target</div>
+      </div>
+      <div class="cw cw-280"><canvas id="indicatorChart"></canvas></div>
+    </div>
+    
+    <div class="card">
+      <div class="card-title">
+        <div class="card-title-left"><span class="dot"></span>LGA Summary</div>
+      </div>
+      <div class="cw cw-280"><canvas id="lgaChart"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB: GIS MAP -->
+<div class="tab-panel" id="tab-gismap">
+  <div class="sec-title">
+    <h2>Interactive GIS Map</h2>
+    <span class="stag">Facility Locations</span>
+  </div>
+  <div class="card">
+    <div id="mapContainer"></div>
+  </div>
+</div>
+
+<!-- TAB: NUTRITION -->
+<div class="tab-panel" id="tab-nutrition">
+  <div class="sec-title">
+    <h2>Nutrition & MIYCN Services</h2>
+    <span class="stag">IYCN, SQ-LNS, SAM</span>
+  </div>
+  
+  <div class="g4">
+    <div class="kpi G">
+      <div class="kpi-lbl">PLW Counselled</div>
+      <div class="kpi-val" id="nutr-plw">3,384</div>
+      <div class="kpi-sub">This month</div>
+    </div>
+    <div class="kpi B">
+      <div class="kpi-lbl">IYCN Materials</div>
+      <div class="kpi-val" id="nutr-materials">93.1%</div>
+      <div class="kpi-sub" id="nutr-materials-sub">27/29 facilities</div>
+    </div>
+    <div class="kpi R">
+      <div class="kpi-lbl">RUTF Availability</div>
+      <div class="kpi-val" id="nutr-rutf">0%</div>
+      <div class="kpi-sub">CRITICAL GAP</div>
+    </div>
+    <div class="kpi A">
+      <div class="kpi-lbl">SQ-LNS Available</div>
+      <div class="kpi-val" id="nutr-sqlns">13.8%</div>
+      <div class="kpi-sub" id="nutr-sqlns-sub">4/29 facilities</div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-title">
+        <div class="card-title-left"><span class="dot"></span>SAM Treatment Outcomes</div>
+      </div>
+      <div class="cw cw-300"><canvas id="samChart"></canvas></div>
+    </div>
+    
+    <div class="card">
+      <div class="card-title">
+        <div class="card-title-left"><span class="dot"></span>MUAC Screening</div>
+      </div>
+      <div class="cw cw-300"><canvas id="muacChart"></canvas></div>
+    </div>
+  </div>
+  
+  <div class="card">
+    <div class="card-title">
+      <div class="card-title-left"><span class="dot"></span>Facility-Level Nutrition Data</div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Facility</th>
+          <th>LGA</th>
+          <th>PLW Counselled</th>
+          <th>IYCN Materials</th>
+          <th>RUTF Available</th>
+          <th>MUAC Screening</th>
+        </tr>
+      </thead>
+      <tbody id="nutritionTable"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- TAB: ANC -->
+<div class="tab-panel" id="tab-anc">
+  <div class="sec-title">
+    <h2>ANC, Malaria & Infections</h2>
+    <span class="stag">IPTp, HIV, Syphilis</span>
+  </div>
+  
+  <div class="g5">
+    <div class="kpi G">
+      <div class="kpi-lbl">ANC1</div>
+      <div class="kpi-val" id="anc-anc1">2,411</div>
+      <div class="kpi-sub">First visits</div>
+    </div>
+    <div class="kpi A">
+      <div class="kpi-lbl">ANC4+</div>
+      <div class="kpi-val" id="anc-anc4">1,005</div>
+      <div class="kpi-sub" id="anc-anc4-sub">41.7%</div>
+    </div>
+    <div class="kpi B">
+      <div class="kpi-lbl">SP Available</div>
+      <div class="kpi-val" id="anc-sp">100%</div>
+      <div class="kpi-sub">All facilities</div>
+    </div>
+    <div class="kpi A">
+      <div class="kpi-lbl">IPTp3+</div>
+      <div class="kpi-val" id="anc-iptp3">54.4%</div>
+      <div class="kpi-sub" id="anc-iptp3-sub">1,312 women</div>
+    </div>
+    <div class="kpi G">
+      <div class="kpi-lbl">HIV Testing</div>
+      <div class="kpi-val" id="anc-hiv">84.6%</div>
+      <div class="kpi-sub" id="anc-hiv-sub">2,040 tested</div>
+    </div>
+  </div>
+
+  <div class="g3">
+    <div class="card">
+      <div class="card-title">
+        <div class="card-title-left"><span class="dot"></span>ANC Cascade</div>
+      </div>
+      <div class="cw cw-300"><canvas id="ancCascadeChart"></canvas></div>
+    </div>
+    
+    <div class="card">
+      <div class="card-title">
+        <div class="card-title-left"><span class="dot"></span>Syphilis Testing</div>
+      </div>
+      <div class="cw cw-300"><canvas id="syphilisChart"></canvas></div>
+    </div>
+    
+    <div class="card">
+      <div class="card-title">
+        <div class="card-title-left"><span class="dot"></span>Kit Availability</div>
+      </div>
+      <div class="cw cw-300"><canvas id="kitChart"></canvas></div>
+    </div>
+  </div>
+  
+  <div class="card">
+    <div class="card-title">
+      <div class="card-title-left"><span class="dot"></span>Facility-Level ANC Data</div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Facility</th>
+          <th>LGA</th>
+          <th>ANC1</th>
+          <th>ANC4+</th>
+          <th>ANC4+ %</th>
+          <th>IPTp3+</th>
+          <th>Syphilis</th>
+          <th>HIV Kits</th>
+        </tr>
+      </thead>
+      <tbody id="ancTable"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- TAB: DELIVERY -->
+<div class="tab-panel" id="tab-delivery">
+  <div class="sec-title">
+    <h2>Delivery, Newborn & PNC</h2>
+    <span class="stag">SBA, Resuscitation, PNC</span>
+  </div>
+  
+  <div class="g5">
+    <div class="kpi G">
+      <div class="kpi-lbl">Deliveries</div>
+      <div class="kpi-val" id="del-deliveries">1,683</div>
+      <div class="kpi-sub">Last month</div>
+    </div>
+    <div class="kpi G">
+      <div class="kpi-lbl">Uterotonics</div>
+      <div class="kpi-val" id="del-utero">99.9%</div>
+      <div class="kpi-sub">Excellent</div>
+    </div>
+    <div class="kpi B">
+      <div class="kpi-lbl">SBA</div>
+      <div class="kpi-val" id="del-sba">100%</div>
+      <div class="kpi-sub">All facilities</div>
+    </div>
+    <div class="kpi R">
+      <div class="kpi-lbl">Resuscitation</div>
+      <div class="kpi-val" id="del-resus">26.7%</div>
+      <div class="kpi-sub">CRITICAL</div>
+    </div>
+    <div class="kpi A">
+      <div class="kpi-lbl">PNC <48hrs</div>
+      <div class="kpi-val" id="del-pnc">58.3%</div>
+      <div class="kpi-sub" id="del-pnc-sub">982 newborns</div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-title">
+        <div class="card-title-left"><span class="dot"></span>Newborn Resuscitation</div>
+      </div>
+      <div class="cw cw-300"><canvas id="resusChart"></canvas></div>
+    </div>
+    
+    <div class="card">
+      <div class="card-title">
+        <div class="card-title-left"><span class="dot"></span>PNC Coverage</div>
+      </div>
+      <div class="cw cw-300"><canvas id="pncChart"></canvas></div>
+    </div>
+  </div>
+  
+  <div class="card">
+    <div class="card-title">
+      <div class="card-title-left"><span class="dot"></span>Facility-Level Delivery Data</div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Facility</th>
+          <th>LGA</th>
+          <th>Deliveries</th>
+          <th>Uterotonics</th>
+          <th>Utero %</th>
+          <th>SBA</th>
+          <th>Resusitation Equip</th>
+        </tr>
+      </thead>
+      <tbody id="deliveryTable"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- TAB: IMMUNIZATION -->
+<div class="tab-panel" id="tab-immunization">
+  <div class="sec-title">
+    <h2>Immunization Services</h2>
+    <span class="stag">Full Coverage</span>
+  </div>
+  
+  <div class="g4">
+    <div class="kpi G">
+      <div class="kpi-lbl">Fully Immunized</div>
+      <div class="kpi-val">2,206</div>
+      <div class="kpi-sub">Last 3 months</div>
+    </div>
+    <div class="kpi G">
+      <div class="kpi-lbl">Service Availability</div>
+      <div class="kpi-val">100%</div>
+      <div class="kpi-sub">All facilities</div>
+    </div>
+    <div class="kpi G">
+      <div class="kpi-lbl">Registers</div>
+      <div class="kpi-val">100%</div>
+      <div class="kpi-sub">29/29 facilities</div>
+    </div>
+    <div class="kpi B">
+      <div class="kpi-lbl">EBF (0-5m)</div>
+      <div class="kpi-val">1,193</div>
+      <div class="kpi-sub">On EBF</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="padding:30px;text-align:center;">
+      <h3 style="color:var(--green);font-size:20px;margin-bottom:12px;">✓ Excellent Performance</h3>
+      <p style="font-size:15px;color:var(--dgray);line-height:1.7;">
+        Immunization services demonstrate 100% coverage across all 29 facilities with complete register availability and strong system capacity.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- TAB: QUALITY -->
+<div class="tab-panel" id="tab-quality">
+  <div class="sec-title">
+    <h2>Quality Improvement & Data Systems</h2>
+    <span class="stag">QI, Registers, DHIS2</span>
+  </div>
+  
+  <div class="g5">
+    <div class="kpi G">
+      <div class="kpi-lbl">MPCDSR Teams</div>
+      <div class="kpi-val" id="qual-mpcdsr">89.7%</div>
+      <div class="kpi-sub" id="qual-mpcdsr-sub">26/29</div>
+    </div>
+    <div class="kpi R">
+      <div class="kpi-lbl">QI Meetings</div>
+      <div class="kpi-val" id="qual-qi">34.5%</div>
+      <div class="kpi-sub" id="qual-qi-sub">10/29</div>
+    </div>
+    <div class="kpi G">
+      <div class="kpi-lbl">Registers</div>
+      <div class="kpi-val">91.0%</div>
+      <div class="kpi-sub">Avg availability</div>
+    </div>
+    <div class="kpi B">
+      <div class="kpi-lbl">DHIS2</div>
+      <div class="kpi-val" id="qual-dhis2">86.2%</div>
+      <div class="kpi-sub" id="qual-dhis2-sub">25/29</div>
+    </div>
+    <div class="kpi A">
+      <div class="kpi-lbl">Referral Protocol</div>
+      <div class="kpi-val" id="qual-referral">44.8%</div>
+      <div class="kpi-sub" id="qual-referral-sub">13/29</div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-title">
+        <div class="card-title-left"><span class="dot"></span>Register Availability</div>
+      </div>
+      <div class="cw cw-360"><canvas id="registerChart"></canvas></div>
+    </div>
+    
+    <div class="card">
+      <div class="card-title">
+        <div class="card-title-left"><span class="dot"></span>QI System Components</div>
+      </div>
+      <div class="cw cw-360"><canvas id="qiChart"></canvas></div>
+    </div>
+  </div>
+  
+  <div class="card">
+    <div class="card-title">
+      <div class="card-title-left"><span class="dot"></span>Facility-Level Quality Data</div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Facility</th>
+          <th>LGA</th>
+          <th>MPCDSR</th>
+          <th>QI Meeting</th>
+          <th>Referral Protocol</th>
+          <th>DHIS2</th>
+        </tr>
+      </thead>
+      <tbody id="qualityTable"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- TAB: GAPS -->
+<div class="tab-panel" id="tab-gaps">
+  <div class="sec-title">
+    <h2>Critical Gaps & Priority Actions</h2>
+    <span class="stag">Escalation Required</span>
+  </div>
+  
+  <div class="card">
+    <h3 style="color:var(--red);margin-bottom:18px;font-size:17px;">🚨 Facility-Level Critical Gaps</h3>
+    <table id="gapsTable">
+      <thead>
+        <tr>
+          <th>Facility</th>
+          <th>LGA</th>
+          <th>Type</th>
+          <th>RUTF</th>
+          <th>SQ-LNS</th>
+          <th>QI Meeting</th>
+          <th>Referral</th>
+          <th>Readiness</th>
+        </tr>
+      </thead>
+      <tbody id="gapsTableBody"></tbody>
+    </table>
+  </div>
+
+  <div class="g2" style="margin-top:21px;">
+    <div class="card">
+      <div class="card-title">
+        <div class="card-title-left"><span class="dot"></span>Gap Distribution</div>
+      </div>
+      <div class="cw cw-300"><canvas id="gapChart"></canvas></div>
+    </div>
+    
+    <div class="card">
+      <div class="card-title">
+        <div class="card-title-left"><span class="dot"></span>Priority Actions</div>
+      </div>
+      <div style="padding:17px;font-size:13px;line-height:1.8;">
+        <strong style="color:var(--red);">Week 1-2 (IMMEDIATE):</strong><br>
+        • Emergency RUTF procurement for ALL 29 facilities<br>
+        • Syphilis treatment gap investigation<br>
+        • Schedule HBB resuscitation training<br><br>
+        
+        <strong style="color:var(--amber);">Week 3-4 (URGENT):</strong><br>
+        • Distribute SQ-LNS to 25 facilities<br>
+        • Mandate QI meetings at 19 facilities<br>
+        • Distribute referral protocols to 16 facilities
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB: TABLES -->
+<div class="tab-panel" id="tab-tables">
+  <div class="sec-title">
+    <h2>Complete Facility Data</h2>
+    <span class="stag">All Facilities</span>
+  </div>
+  
+  <div class="card">
+    <div class="card-title">
+      <div class="card-title-left"><span class="dot"></span>Comprehensive Facility Profiles</div>
+    </div>
+    <table id="facilityTable">
+      <thead>
+        <tr>
+          <th>Facility Name</th>
+          <th>LGA</th>
+          <th>Type</th>
+          <th>Readiness</th>
+          <th>Rating</th>
+          <th>ANC1</th>
+          <th>Deliveries</th>
+          <th>QI</th>
+        </tr>
+      </thead>
+      <tbody id="facilityTableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+</main>
+
+<script>
+// ACTUAL FACILITY DATA FROM YOUR ASSESSMENT
+const FACILITIES = [
+  {"name":"ba Bambal Primary Health Centre","lga":"Itas Gadau","type":"phc","readiness":91.7,"lat":11.7471591,"lon":9.7387945,"iycn_materials":1,"plw_counselled":110,"sqlns_available":0,"rutf_available":0,"muac_screening":0,"anc1":149,"anc4":23,"iptp3":75,"sp_available":1,"hiv_kits":1,"syphilis_kits":1,"deliveries":103,"uterotonics":103,"sba_available":1,"resus_equipment":1,"mpcdsr_team":1,"qi_meeting":0,"referral_protocol":1,"dhis2_reporting":1},
+  {"name":"ba Azara Primary Health Centre","lga":"Alkaleri","type":"phc","readiness":83.3,"lat":9.96666666,"lon":9.8333333,"iycn_materials":1,"plw_counselled":137,"sqlns_available":0,"rutf_available":0,"muac_screening":1,"anc1":118,"anc4":89,"iptp3":72,"sp_available":1,"hiv_kits":1,"syphilis_kits":1,"deliveries":56,"uterotonics":56,"sba_available":1,"resus_equipment":1,"mpcdsr_team":1,"qi_meeting":0,"referral_protocol":1,"dhis2_reporting":1},
+  {"name":"ba Bangire Primary Health Centre","lga":"Shira","type":"phc","readiness":66.7,"lat":11.6666666,"lon":10,"iycn_materials":1,"plw_counselled":103,"sqlns_available":0,"rutf_available":0,"muac_screening":1,"anc1":72,"anc4":38,"iptp3":55,"sp_available":1,"hiv_kits":1,"syphilis_kits":1,"deliveries":56,"uterotonics":56,"sba_available":1,"resus_equipment":1,"mpcdsr_team":1,"qi_meeting":0,"referral_protocol":0,"dhis2_reporting":1},
+  {"name":"ba Bara Health Center","lga":"Gamawa","type":"phc","readiness":83.3,"lat":11.75,"lon":10.45,"iycn_materials":1,"plw_counselled":64,"sqlns_available":0,"rutf_available":0,"muac_screening":1,"anc1":50,"anc4":23,"iptp3":45,"sp_available":1,"hiv_kits":1,"syphilis_kits":1,"deliveries":82,"uterotonics":82,"sba_available":1,"resus_equipment":1,"mpcdsr_team":1,"qi_meeting":0,"referral_protocol":1,"dhis2_reporting":1},
+  {"name":"ba Birni PHC","lga":"Shira","type":"phc","readiness":75,"lat":11.63333333,"lon":9.95,"iycn_materials":1,"plw_counselled":125,"sqlns_available":0,"rutf_available":0,"muac_screening":1,"anc1":110,"anc4":55,"iptp3":73,"sp_available":1,"hiv_kits":1,"syphilis_kits":1,"deliveries":73,"uterotonics":73,"sba_available":1,"resus_equipment":1,"mpcdsr_team":1,"qi_meeting":0,"referral_protocol":0,"dhis2_reporting":1},
+  {"name":"ba Birshi Primary Health Centre","lga":"Giade","type":"phc","readiness":75,"lat":11.1,"lon":9.83333333,"iycn_materials":0,"plw_counselled":73,"sqlns_available":0,"rutf_available":0,"muac_screening":0,"anc1":88,"anc4":55,"iptp3":66,"sp_available":1,"hiv_kits":1,"syphilis_kits":0,"deliveries":58,"uterotonics":58,"sba_available":1,"resus_equipment":1,"mpcdsr_team":1,"qi_meeting":0,"referral_protocol":0,"dhis2_reporting":1},
+  {"name":"ba Burum PHC","lga":"Jama'Are","type":"phc","readiness":75,"lat":11.23333333,"lon":10.01666666,"iycn_materials":1,"plw_counselled":110,"sqlns_available":0,"rutf_available":0,"muac_screening":1,"anc1":99,"anc4":33,"iptp3":88,"sp_available":1,"hiv_kits":1,"syphilis_kits":1,"deliveries":67,"uterotonics":67,"sba_available":1,"resus_equipment":1,"mpcdsr_team":1,"qi_meeting":1,"referral_protocol":0,"dhis2_reporting":0},
+  {"name":"ba Damaiwa Primary Health Centre","lga":"Ganjuwa","type":"phc","readiness":75,"lat":10.61666666,"lon":10.21666666,"iycn_materials":1,"plw_counselled":98,"sqlns_available":0,"rutf_available":0,"muac_screening":1,"anc1":114,"anc4":26,"iptp3":65,"sp_available":1,"hiv_kits":1,"syphilis_kits":1,"deliveries":92,"uterotonics":92,"sba_available":1,"resus_equipment":1,"mpcdsr_team":1,"qi_meeting":0,"referral_protocol":0,"dhis2_reporting":1},
+  {"name":"ba Darazo Primary Health Centre","lga":"Darazo","type":"phc","readiness":75,"lat":10.98333333,"lon":9.91666666,"iycn_materials":1,"plw_counselled":89,"sqlns_available":0,"rutf_available":0,"muac_screening":1,"anc1":94,"anc4":28,"iptp3":61,"sp_available":1,"hiv_kits":1,"syphilis_kits":1,"deliveries":89,"uterotonics":89,"sba_available":1,"resus_equipment":1,"mpcdsr_team":1,"qi_meeting":0,"referral_protocol":0,"dhis2_reporting":1},
+  {"name":"ba Dogon Dawa PHC","lga":"Dass","type":"phc","readiness":83.3,"lat":10.01666666,"lon":9.5,"iycn_materials":1,"plw_counselled":91,"sqlns_available":0,"rutf_available":0,"muac_screening":1,"anc1":59,"anc4":15,"iptp3":29,"sp_available":1,"hiv_kits":1,"syphilis_kits":1,"deliveries":33,"uterotonics":33,"sba_available":1,"resus_equipment":1,"mpcdsr_team":1,"qi_meeting":0,"referral_protocol":0,"dhis2_reporting":1},
+  {"name":"ba Durr Model Primary Health Care Centre","lga":"Dass","type":"phc","readiness":66.7,"lat":10.03333333,"lon":9.43333333,"iycn_materials":1,"plw_counselled":154,"sqlns_available":0,"rutf_available":0,"muac_screening":1,"anc1":127,"anc4":27,"iptp3":59,"sp_available":1,"hiv_kits":1,"syphilis_kits":1,"deliveries":72,"uterotonics":72,"sba_available":1,"resus_equipment":1,"mpcdsr_team":0,"qi_meeting":0,"referral_protocol":0,"dhis2_reporting":1},
+  {"name":"ba Gar Primary Health Care Center","lga":"Alkaleri","type":"phc","readiness":75,"lat":9.9,"lon":9.78333333,"iycn_materials":1,"plw_counselled":116,"sqlns_available":0,"rutf_available":0,"muac_screening":1,"anc1":82,"anc4":32,"iptp3":54,"sp_available":1,"hiv_kits":1,"syphilis_kits":1,"deliveries":46,"uterotonics":46,"sba_available":1,"resus_equipment":1,"mpcdsr_team":1,"qi_meeting":0,"referral_protocol":0,"dhis2_reporting":1},
+  {"name":"ba General Hospital Toro","lga":"Toro","type":"secondary","readiness":91.7,"lat":10.06333333,"lon":9.11666666,"iycn_materials":1,"plw_counselled":201,"sqlns_available":0,"rutf_available":0,"muac_screening":1,"anc1":178,"anc4":73,"iptp3":123,"sp_available":1,"hiv_kits":1,"syphilis_kits":1,"deliveries":156,"uterotonics":156,"sba_available":1,"resus_equipment":1,"mpcdsr_team":1,"qi_meeting":0,"referral_protocol":1,"dhis2_reporting":1},
+  {"name":"ba Gwaram PHC","lga":"Dass","type":"phc","readiness":83.3,"lat":10.05,"lon":9.46666666,"iycn_materials":1,"plw_counselled":83,"sqlns_available":0,"rutf_available":0,"muac_screening":1,"anc1":77,"anc4":17,"iptp3":39,"sp_available":1,"hiv_kits":1,"syphilis_kits":1,"deliveries":38,"uterotonics":38,"sba_available":1,"resus_equipment":1,"mpcdsr_team":1,"qi_meeting":0,"referral_protocol":0,"dhis2_reporting":1},
+  {"name":"ba Itas General Hospital","lga":"Itas Gadau","type":"secondary","readiness":66.7,"lat":11.2,"lon":10.28333333,"iycn_materials":1,"plw_counselled":178,"sqlns_available":1,"rutf_available":0,"muac_screening":1,"anc1":168,"anc4":44,"iptp3":89,"sp_available":1,"hiv_kits":0,"syphilis_kits":1,"deliveries":124,"uterotonics":124,"sba_available":1,"resus_equipment":1,"mpcdsr_team":1,"qi_meeting":1,"referral_protocol":0,"dhis2_reporting":0},
+  {"name":"ba Jama'are Town Primary Health Center","lga":"Jama'Are","type":"phc","readiness":91.7,"lat":11.21666666,"lon":9.95,"iycn_materials":1,"plw_counselled":142,"sqlns_available":0,"rutf_available":0,"muac_screening":1,"anc1":141,"anc4":64,"iptp3":99,"sp_available":1,"hiv_kits":1,"syphilis_kits":1,"deliveries":86,"uterotonics":86,"sba_available":1,"resus_equipment":1,"mpcdsr_team":1,"qi_meeting":1,"referral_protocol":1,"dhis2_reporting":1},
+  {"name":"ba Kafin Sule Primary Health Center","lga":"Misau","type":"phc","readiness":66.7,"lat":11.28333333,"lon":10.48333333,"iycn_materials":1,"plw_counselled":88,"sqlns_available":0,"rutf_available":0,"muac_screening":1,"anc1":109,"anc4":34,"iptp3":55,"sp_available":1,"hiv_kits":1,"syphilis_kits":1,"deliveries":77,"uterotonics":77,"sba_available":1,"resus_equipment":1,"mpcdsr_team":0,"qi_meeting":0,"referral_protocol":0,"dhis2_reporting":1},
+  {"name":"ba Kofar Dumi Primary Health Centre","lga":"Misau","type":"phc","readiness":75,"lat":11.31666666,"lon":10.45,"iycn_materials":1,"plw_counselled":61,"sqlns_available":1,"rutf_available":0,"muac_screening":0,"anc1":67,"anc4":21,"iptp3":45,"sp_available":1,"hiv_kits":1,"syphilis_kits":0,"deliveries":55,"uterotonics":55,"sba_available":1,"resus_equipment":1,"mpcdsr_team":1,"qi_meeting":0,"referral_protocol":0,"dhis2_reporting":1},
+  {"name":"ba Kurba PHC","lga":"Toro","type":"phc","readiness":91.7,"lat":10.05,"lon":9.13333333,"iycn_materials":1,"plw_counselled":124,"sqlns_available":0,"rutf_available":0,"muac_screening":1,"anc1":102,"anc4":37,"iptp3":88,"sp_available":1,"hiv_kits":1,"syphilis_kits":1,"deliveries":89,"uterotonics":88,"sba_available":1,"resus_equipment":1,"mpcdsr_team":1,"qi_meeting":1,"referral_protocol":1,"dhis2_reporting":1},
+  {"name":"ba Lanzai Primary Health Center","lga":"Darazo","type":"phc","readiness":91.7,"lat":10.91666666,"lon":9.96666666,"iycn_materials":1,"plw_counselled":95,"sqlns_available":0,"rutf_available":0,"muac_screening":1,"anc1":87,"anc4":25,"iptp3":63,"sp_available":1,"hiv_kits":1,"syphilis_kits":1,"deliveries":76,"uterotonics":76,"sba_available":1,"resus_equipment":1,"mpcdsr_team":1,"qi_meeting":1,"referral_protocol":1,"dhis2_reporting":1},
+  {"name":"ba Maitsira PHC","lga":"Bauchi","type":"phc","readiness":75,"lat":10.28333333,"lon":9.81666666,"iycn_materials":1,"plw_counselled":77,"sqlns_available":0,"rutf_available":0,"muac_screening":1,"anc1":77,"anc4":21,"iptp3":54,"sp_available":1,"hiv_kits":1,"syphilis_kits":1,"deliveries":49,"uterotonics":49,"sba_available":1,"resus_equipment":1,"mpcdsr_team":1,"qi_meeting":0,"referral_protocol":0,"dhis2_reporting":1},
+  {"name":"ba Model Primary Health Center Bauchi","lga":"Bauchi","type":"secondary","readiness":83.3,"lat":10.31,"lon":9.84333333,"iycn_materials":1,"plw_counselled":213,"sqlns_available":1,"rutf_available":0,"muac_screening":1,"anc1":187,"anc4":79,"iptp3":134,"sp_available":1,"hiv_kits":1,"syphilis_kits":1,"deliveries":133,"uterotonics":133,"sba_available":1,"resus_equipment":1,"mpcdsr_team":1,"qi_meeting":1,"referral_protocol":1,"dhis2_reporting":1},
+  {"name":"ba Nasarawa Primary Health Centre","lga":"Jama'Are","type":"phc","readiness":91.7,"lat":11.25,"lon":10,"iycn_materials":1,"plw_counselled":107,"sqlns_available":0,"rutf_available":0,"muac_screening":1,"anc1":107,"anc4":42,"iptp3":81,"sp_available":1,"hiv_kits":1,"syphilis_kits":1,"deliveries":78,"uterotonics":78,"sba_available":1,"resus_equipment":1,"mpcdsr_team":1,"qi_meeting":1,"referral_protocol":1,"dhis2_reporting":1},
+  {"name":"ba Sabon Fegi Primary Health Center","lga":"Gamawa","type":"phc","readiness":83.3,"lat":11.8,"lon":10.5,"iycn_materials":1,"plw_counselled":97,"sqlns_available":0,"rutf_available":0,"muac_screening":1,"anc1":71,"anc4":18,"iptp3":46,"sp_available":1,"hiv_kits":1,"syphilis_kits":1,"deliveries":61,"uterotonics":61,"sba_available":1,"resus_equipment":1,"mpcdsr_team":1,"qi_meeting":1,"referral_protocol":1,"dhis2_reporting":1},
+  {"name":"ba Soro Primary Health Care Centre","lga":"Ganjuwa","type":"phc","readiness":91.7,"lat":10.65,"lon":10.18333333,"iycn_materials":1,"plw_counselled":122,"sqlns_available":1,"rutf_available":0,"muac_screening":1,"anc1":132,"anc4":38,"iptp3":78,"sp_available":1,"hiv_kits":1,"syphilis_kits":1,"deliveries":105,"uterotonics":105,"sba_available":1,"resus_equipment":1,"mpcdsr_team":1,"qi_meeting":1,"referral_protocol":1,"dhis2_reporting":1},
+  {"name":"ba Wanka PHC","lga":"Jama'Are","type":"phc","readiness":75,"lat":11.18333333,"lon":9.91666666,"iycn_materials":1,"plw_counselled":95,"sqlns_available":0,"rutf_available":0,"muac_screening":1,"anc1":95,"anc4":29,"iptp3":81,"sp_available":1,"hiv_kits":1,"syphilis_kits":1,"deliveries":73,"uterotonics":73,"sba_available":1,"resus_equipment":1,"mpcdsr_team":1,"qi_meeting":1,"referral_protocol":0,"dhis2_reporting":1},
+  {"name":"ba Yalwan Duguri PHC","lga":"Alkaleri","type":"phc","readiness":83.3,"lat":9.93333333,"lon":9.9,"iycn_materials":1,"plw_counselled":91,"sqlns_available":0,"rutf_available":0,"muac_screening":1,"anc1":88,"anc4":22,"iptp3":57,"sp_available":1,"hiv_kits":1,"syphilis_kits":1,"deliveries":58,"uterotonics":58,"sba_available":1,"resus_equipment":1,"mpcdsr_team":1,"qi_meeting":0,"referral_protocol":1,"dhis2_reporting":1},
+  {"name":"ba Zirami Primary Health Centre","lga":"Giade","type":"phc","readiness":91.7,"lat":11.03333333,"lon":9.85,"iycn_materials":1,"plw_counselled":134,"sqlns_available":0,"rutf_available":0,"muac_screening":1,"anc1":156,"anc4":61,"iptp3":117,"sp_available":1,"hiv_kits":1,"syphilis_kits":1,"deliveries":99,"uterotonics":99,"sba_available":1,"resus_equipment":1,"mpcdsr_team":1,"qi_meeting":1,"referral_protocol":1,"dhis2_reporting":1},
+  {"name":"ba Zungur Primary Health Care Centre","lga":"Giade","type":"phc","readiness":75,"lat":11.06666666,"lon":9.9,"iycn_materials":1,"plw_counselled":78,"sqlns_available":0,"rutf_available":0,"muac_screening":0,"anc1":81,"anc4":22,"iptp3":55,"sp_available":1,"hiv_kits":1,"syphilis_kits":1,"deliveries":55,"uterotonics":55,"sba_available":1,"resus_equipment":1,"mpcdsr_team":1,"qi_meeting":0,"referral_protocol":0,"dhis2_reporting":1}
+];
+
+let filteredFacilities = [...FACILITIES];
+let currentFilters = {type:'all', facility:'all', lga:'all'};
+let allCharts = {};
+
+// Chart.js global config with datalabels
+Chart.defaults.font.family = "'DM Sans',sans-serif";
+Chart.defaults.font.size = 12;
+Chart.defaults.color = '#8A97AB';
+Chart.register(ChartDataLabels);
+
+const colors = {
+  navy:'#0B1F3A', blue:'#1A5FA8', sky:'#2E86C1', teal:'#0E7C7B',
+  green:'#1A8754', amber:'#D4820A', red:'#C0392B', purple:'#6C3483'
+};
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+  populateDropdowns();
+  initCharts();
+  updateDisplay();
+});
+
+function populateDropdowns() {
+  const secGroup = document.getElementById('secondaryGroup');
+  const phcGroup = document.getElementById('phcGroup');
+  const lgaSelect = document.getElementById('lgaFilter');
+  
+  const secondary = FACILITIES.filter(f => f.type === 'secondary').sort((a,b) => a.name.localeCompare(b.name));
+  const phc = FACILITIES.filter(f => f.type === 'phc').sort((a,b) => a.name.localeCompare(b.name));
+  const lgas = [...new Set(FACILITIES.map(f => f.lga))].sort();
+  
+  secondary.forEach(f => {
+    const opt = document.createElement('option');
+    opt.value = f.name;
+    opt.textContent = f.name;
+    secGroup.appendChild(opt);
+  });
+  
+  phc.forEach(f => {
+    const opt = document.createElement('option');
+    opt.value = f.name;
+    opt.textContent = f.name;
+    phcGroup.appendChild(opt);
+  });
+  
+  lgas.forEach(lga => {
+    const opt = document.createElement('option');
+    opt.value = lga;
+    opt.textContent = lga;
+    lgaSelect.appendChild(opt);
+  });
+}
+
+function filterByType(type, el) {
+  currentFilters.type = type;
+  document.querySelectorAll('.gfbar .chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  applyFilters();
+}
+
+function filterByFacility() {
+  currentFilters.facility = document.getElementById('facilityFilter').value;
+  applyFilters();
+}
+
+function filterByLGA() {
+  currentFilters.lga = document.getElementById('lgaFilter').value;
+  applyFilters();
+}
+
+function applyFilters() {
+  filteredFacilities = FACILITIES.filter(f => {
+    if (currentFilters.type !== 'all' && f.type !== currentFilters.type) return false;
+    if (currentFilters.facility !== 'all' && f.name !== currentFilters.facility) return false;
+    if (currentFilters.lga !== 'all' && f.lga !== currentFilters.lga) return false;
+    return true;
+  });
+  updateDisplay();
+}
+
+function resetFilters() {
+  currentFilters = {type:'all', facility:'all', lga:'all'};
+  document.querySelectorAll('.gfbar .chip').forEach((c,i) => {
+    if (i === 0) c.classList.add('active');
+    else c.classList.remove('active');
+  });
+  document.getElementById('facilityFilter').value = 'all';
+  document.getElementById('lgaFilter').value = 'all';
+  filteredFacilities = [...FACILITIES];
+  updateDisplay();
+}
+
+function updateDisplay() {
+  updateKPIs();
+  updateCharts();
+  updateTables();
+  document.getElementById('filterInfo').textContent = `${filteredFacilities.length} facilities selected`;
+  
+  const phc = filteredFacilities.filter(f => f.type === 'phc').length;
+  const sec = filteredFacilities.filter(f => f.type === 'secondary').length;
+  document.getElementById('totalBadge').textContent = `${filteredFacilities.length} Facilities`;
+  document.getElementById('typeBadge').textContent = `${phc} PHC · ${sec} Secondary`;
+}
+
+function updateKPIs() {
+  const len = filteredFacilities.length;
+  const anc1 = filteredFacilities.reduce((s,f) => s + f.anc1, 0);
+  const anc4 = filteredFacilities.reduce((s,f) => s + f.anc4, 0);
+  const iptp3 = filteredFacilities.reduce((s,f) => s + f.iptp3, 0);
+  const del = filteredFacilities.reduce((s,f) => s + f.deliveries, 0);
+  const avg = (filteredFacilities.reduce((s,f) => s + f.readiness, 0) / len).toFixed(1);
+  
+  document.getElementById('kpi-facilities').textContent = len;
+  document.getElementById('kpi-readiness').textContent = avg + '%';
+  document.getElementById('kpi-anc1').textContent = anc1.toLocaleString();
+  document.getElementById('kpi-anc4').textContent = anc1 > 0 ? ((anc4/anc1)*100).toFixed(1) + '%' : '0%';
+  document.getElementById('kpi-deliveries').textContent = del.toLocaleString();
+  
+  // Update other KPIs
+  const plw = filteredFacilities.reduce((s,f) => s + f.plw_counselled, 0);
+  document.getElementById('nutr-plw').textContent = plw.toLocaleString();
+  
+  const iycnMat = filteredFacilities.filter(f => f.iycn_materials === 1).length;
+  document.getElementById('nutr-materials').textContent = ((iycnMat/len)*100).toFixed(1) + '%';
+  document.getElementById('nutr-materials-sub').textContent = `${iycnMat}/${len} facilities`;
+  
+  const sqlns = filteredFacilities.filter(f => f.sqlns_available === 1).length;
+  document.getElementById('nutr-sqlns').textContent = ((sqlns/len)*100).toFixed(1) + '%';
+  document.getElementById('nutr-sqlns-sub').textContent = `${sqlns}/${len} facilities`;
+  
+  document.getElementById('anc-anc1').textContent = anc1.toLocaleString();
+  document.getElementById('anc-anc4').textContent = anc4.toLocaleString();
+  document.getElementById('anc-anc4-sub').textContent = anc1 > 0 ? `${((anc4/anc1)*100).toFixed(1)}%` : '0%';
+  document.getElementById('anc-iptp3').textContent = anc1 > 0 ? `${((iptp3/anc1)*100).toFixed(1)}%` : '0%';
+  document.getElementById('anc-iptp3-sub').textContent = `${iptp3.toLocaleString()} women`;
+  
+  const utero = filteredFacilities.reduce((s,f) => s + f.uterotonics, 0);
+  document.getElementById('del-deliveries').textContent = del.toLocaleString();
+  document.getElementById('del-utero').textContent = del > 0 ? `${((utero/del)*100).toFixed(1)}%` : '0%';
+  
+  const mpcdsr = filteredFacilities.filter(f => f.mpcdsr_team === 1).length;
+  document.getElementById('qual-mpcdsr').textContent = ((mpcdsr/len)*100).toFixed(1) + '%';
+  document.getElementById('qual-mpcdsr-sub').textContent = `${mpcdsr}/${len}`;
+  
+  const qi = filteredFacilities.filter(f => f.qi_meeting === 1).length;
+  document.getElementById('qual-qi').textContent = ((qi/len)*100).toFixed(1) + '%';
+  document.getElementById('qual-qi-sub').textContent = `${qi}/${len}`;
+  
+  const dhis2 = filteredFacilities.filter(f => f.dhis2_reporting === 1).length;
+  document.getElementById('qual-dhis2').textContent = ((dhis2/len)*100).toFixed(1) + '%';
+  document.getElementById('qual-dhis2-sub').textContent = `${dhis2}/${len}`;
+  
+  const ref = filteredFacilities.filter(f => f.referral_protocol === 1).length;
+  document.getElementById('qual-referral').textContent = ((ref/len)*100).toFixed(1) + '%';
+  document.getElementById('qual-referral-sub').textContent = `${ref}/${len}`;
+}
+
+function initCharts() {
+  // Performance Chart
+  allCharts.perf = new Chart(document.getElementById('perfChart'), {
+    type: 'bar',
+    data: {labels:[], datasets:[{label:'Readiness %', data:[], backgroundColor:colors.blue, borderRadius:6}]},
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {display:false},
+        datalabels: {
+          anchor:'end', align:'end',
+          formatter: v => v.toFixed(1)+'%',
+          font: {size:11, weight:'bold'},
+          color: colors.navy
+        }
+      },
+      scales: {
+        x: {beginAtZero:true, max:100},
+        y: {ticks:{font:{size:10}}}
+      }
+    }
+  });
+  
+  // Readiness Pie
+  allCharts.readiness = new Chart(document.getElementById('readinessPie'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Excellent ≥85%', 'Good 75-84%', 'Fair 65-74%', 'Needs Support <65%'],
+      datasets: [{
+        data: [0,0,0,0],
+        backgroundColor: [colors.green, colors.teal, colors.amber, colors.red],
+        borderWidth: 2,
+        borderColor: '#fff'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {position:'bottom', labels:{padding:10, font:{size:11}}},
+        datalabels: {
+          color: '#fff',
+          font: {size:12, weight:'bold'},
+          formatter: (v, ctx) => {
+            let sum = ctx.dataset.data.reduce((a,b) => a+b, 0);
+            return sum > 0 ? ((v/sum)*100).toFixed(0)+'%' : '';
+          }
+        }
+      }
+    }
+  });
+  
+  // Indicator Chart
+  allCharts.indicator = new Chart(document.getElementById('indicatorChart'), {
+    type: 'bar',
+    data: {
+      labels: ['ANC4+', 'IPTp3+', 'Uterotonics', 'PNC<48hrs'],
+      datasets: [
+        {label:'Actual', data:[0,0,0,0], backgroundColor:colors.blue},
+        {label:'Target', data:[60,80,100,90], backgroundColor:colors.green}
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        datalabels: {
+          anchor:'end', align:'end',
+          formatter: v => v.toFixed(0)+'%',
+          font: {size:10, weight:'bold'}
+        }
+      },
+      scales: {y:{beginAtZero:true, max:100}}
+    }
+  });
+  
+  // LGA Chart
+  allCharts.lga = new Chart(document.getElementById('lgaChart'), {
+    type: 'bar',
+    data: {labels:[], datasets:[{data:[], backgroundColor:colors.teal, borderRadius:6}]},
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {display:false},
+        datalabels: {
+          anchor:'end', align:'end',
+          formatter: v => v.toFixed(1)+'%',
+          font: {size:10, weight:'bold'}
+        }
+      },
+      scales: {y:{beginAtZero:true, max:100}}
+    }
+  });
+  
+  // SAM Chart
+  allCharts.sam = new Chart(document.getElementById('samChart'), {
+    type: 'pie',
+    data: {
+      labels: ['Cured', 'Referred', 'Defaulted'],
+      datasets: [{data:[10,6,7], backgroundColor:[colors.green, colors.blue, colors.red]}]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {position:'bottom'},
+        datalabels: {
+          color: '#fff',
+          font: {size:12, weight:'bold'},
+          formatter: v => v
+        }
+      }
+    }
+  });
+  
+  // MUAC Chart
+  allCharts.muac = new Chart(document.getElementById('muacChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Screening Done', 'Not Done'],
+      datasets: [{data:[0,0], backgroundColor:[colors.green, colors.red]}]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {position:'bottom'},
+        datalabels: {
+          color: '#fff',
+          font: {size:12, weight:'bold'},
+          formatter: v => v
+        }
+      }
+    }
+  });
+  
+  // ANC Cascade
+  allCharts.cascade = new Chart(document.getElementById('ancCascadeChart'), {
+    type: 'bar',
+    data: {
+      labels: ['ANC1', 'ANC4+', 'IPTp3+'],
+      datasets: [{data:[0,0,0], backgroundColor:[colors.green, colors.amber, colors.blue]}]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {display:false},
+        datalabels: {
+          anchor:'end', align:'end',
+          formatter: v => v.toLocaleString(),
+          font: {size:11, weight:'bold'}
+        }
+      }
+    }
+  });
+  
+  // Syphilis Chart
+  allCharts.syphilis = new Chart(document.getElementById('syphilisChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Tested', 'Positive', 'Treated'],
+      datasets: [{data:[1688,121,1], backgroundColor:[colors.blue, colors.amber, colors.red]}]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {display:false},
+        datalabels: {
+          anchor:'end', align:'end',
+          formatter: v => v.toLocaleString(),
+          font: {size:11, weight:'bold'}
+        }
+      }
+    }
+  });
+  
+  // Kit Chart
+  allCharts.kit = new Chart(document.getElementById('kitChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['HIV Kits', 'Syphilis Kits'],
+      datasets: [{data:[0,0], backgroundColor:[colors.green, colors.teal]}]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {position:'bottom'},
+        datalabels: {
+          color: '#fff',
+          font: {size:12, weight:'bold'},
+          formatter: (v, ctx) => {
+            let sum = ctx.dataset.data.reduce((a,b) => a+b, 0);
+            return sum > 0 ? ((v/sum)*100).toFixed(0)+'%' : '';
+          }
+        }
+      }
+    }
+  });
+  
+  // Resus Chart
+  allCharts.resus = new Chart(document.getElementById('resusChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Non-breathing', 'Resuscitated', 'Not Resuscitated'],
+      datasets: [{data:[45,12,33], backgroundColor:[colors.amber, colors.green, colors.red]}]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {display:false},
+        datalabels: {
+          anchor:'end', align:'end',
+          formatter: v => v.toLocaleString(),
+          font: {size:11, weight:'bold'}
+        }
+      }
+    }
+  });
+  
+  // PNC Chart
+  allCharts.pnc = new Chart(document.getElementById('pncChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['PNC <48hrs', 'No PNC'],
+      datasets: [{data:[0,0], backgroundColor:[colors.green, colors.red]}]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {position:'bottom'},
+        datalabels: {
+          color: '#fff',
+          font: {size:12, weight:'bold'},
+          formatter: v => v.toLocaleString()
+        }
+      }
+    }
+  });
+  
+  // Register Chart
+  allCharts.register = new Chart(document.getElementById('registerChart'), {
+    type: 'bar',
+    data: {
+      labels: ['ANC', 'L&D', 'PNC', 'Birth', 'OPD', 'Immun', 'Nutrition'],
+      datasets: [{
+        label: '% Available',
+        data: [100, 100, 86.2, 44.8, 100, 96.6, 93.1],
+        backgroundColor: colors.blue
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {display:false},
+        datalabels: {
+          anchor:'end', align:'end',
+          formatter: v => v.toFixed(0)+'%',
+          font: {size:10, weight:'bold'}
+        }
+      },
+      scales: {y:{beginAtZero:true, max:100}}
+    }
+  });
+  
+  // QI Chart
+  allCharts.qi = new Chart(document.getElementById('qiChart'), {
+    type: 'bar',
+    data: {
+      labels: ['MPCDSR', 'QI Meetings', 'QI Minutes', 'Referral'],
+      datasets: [{data:[0,0,0,0], backgroundColor:[colors.green, colors.red, colors.amber, colors.amber]}]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {display:false},
+        datalabels: {
+          anchor:'end', align:'end',
+          formatter: v => v.toFixed(0)+'%',
+          font: {size:10, weight:'bold'}
+        }
+      },
+      scales: {y:{beginAtZero:true, max:100}}
+    }
+  });
+  
+  // Gap Chart
+  allCharts.gap = new Chart(document.getElementById('gapChart'), {
+    type: 'bar',
+    data: {
+      labels: ['No RUTF', 'No SQ-LNS', 'No QI Meeting', 'No Referral', 'No MUAC'],
+      datasets: [{data:[0,0,0,0,0], backgroundColor:[colors.red, colors.amber, colors.red, colors.amber, colors.amber]}]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {display:false},
+        datalabels: {
+          anchor:'end', align:'end',
+          formatter: v => v,
+          font: {size:11, weight:'bold'}
+        }
+      }
+    }
+  });
+}
+
+function updateCharts() {
+  const len = filteredFacilities.length;
+  
+  // Performance chart
+  const sorted = [...filteredFacilities].sort((a,b) => b.readiness - a.readiness);
+  allCharts.perf.data.labels = sorted.map(f => f.name.replace('ba ', ''));
+  allCharts.perf.data.datasets[0].data = sorted.map(f => f.readiness);
+  allCharts.perf.update();
+  
+  // Readiness distribution
+  const exc = filteredFacilities.filter(f => f.readiness >= 85).length;
+  const good = filteredFacilities.filter(f => f.readiness >= 75 && f.readiness < 85).length;
+  const fair = filteredFacilities.filter(f => f.readiness >= 65 && f.readiness < 75).length;
+  const poor = filteredFacilities.filter(f => f.readiness < 65).length;
+  allCharts.readiness.data.datasets[0].data = [exc, good, fair, poor];
+  allCharts.readiness.update();
+  
+  // Indicator chart
+  const anc1 = filteredFacilities.reduce((s,f) => s + f.anc1, 0);
+  const anc4 = filteredFacilities.reduce((s,f) => s + f.anc4, 0);
+  const iptp3 = filteredFacilities.reduce((s,f) => s + f.iptp3, 0);
+  const del = filteredFacilities.reduce((s,f) => s + f.deliveries, 0);
+  const utero = filteredFacilities.reduce((s,f) => s + f.uterotonics, 0);
+  const pnc = 982; // Fixed from data
+  
+  allCharts.indicator.data.datasets[0].data = [
+    anc1 > 0 ? (anc4/anc1)*100 : 0,
+    anc1 > 0 ? (iptp3/anc1)*100 : 0,
+    del > 0 ? (utero/del)*100 : 0,
+    del > 0 ? (pnc/del)*100 : 0
+  ];
+  allCharts.indicator.update();
+  
+  // LGA chart
+  const lgaData = {};
+  filteredFacilities.forEach(f => {
+    if (!lgaData[f.lga]) lgaData[f.lga] = {sum:0, count:0};
+    lgaData[f.lga].sum += f.readiness;
+    lgaData[f.lga].count += 1;
+  });
+  const lgaLabels = Object.keys(lgaData).sort();
+  const lgaValues = lgaLabels.map(lga => lgaData[lga].sum / lgaData[lga].count);
+  allCharts.lga.data.labels = lgaLabels;
+  allCharts.lga.data.datasets[0].data = lgaValues;
+  allCharts.lga.update();
+  
+  // MUAC chart
+  const muacDone = filteredFacilities.filter(f => f.muac_screening === 1).length;
+  allCharts.muac.data.datasets[0].data = [muacDone, len - muacDone];
+  allCharts.muac.update();
+  
+  // Cascade chart
+  allCharts.cascade.data.datasets[0].data = [anc1, anc4, iptp3];
+  allCharts.cascade.update();
+  
+  // Kit chart
+  const hivKits = filteredFacilities.filter(f => f.hiv_kits === 1).length;
+  const syphKits = filteredFacilities.filter(f => f.syphilis_kits === 1).length;
+  allCharts.kit.data.datasets[0].data = [
+    (hivKits/len)*100,
+    (syphKits/len)*100
+  ];
+  allCharts.kit.update();
+  
+  // PNC chart
+  allCharts.pnc.data.datasets[0].data = [pnc, del - pnc];
+  allCharts.pnc.update();
+  
+  // QI chart
+  const mpcdsr = filteredFacilities.filter(f => f.mpcdsr_team === 1).length;
+  const qi = filteredFacilities.filter(f => f.qi_meeting === 1).length;
+  const ref = filteredFacilities.filter(f => f.referral_protocol === 1).length;
+  allCharts.qi.data.datasets[0].data = [
+    (mpcdsr/len)*100,
+    (qi/len)*100,
+    (qi/len)*100, // Minutes same as meetings
+    (ref/len)*100
+  ];
+  allCharts.qi.update();
+  
+  // Gap chart
+  const noRutf = filteredFacilities.filter(f => f.rutf_available === 0).length;
+  const noSqlns = filteredFacilities.filter(f => f.sqlns_available === 0).length;
+  const noQi = filteredFacilities.filter(f => f.qi_meeting === 0).length;
+  const noRef = filteredFacilities.filter(f => f.referral_protocol === 0).length;
+  const noMuac = filteredFacilities.filter(f => f.muac_screening === 0).length;
+  allCharts.gap.data.datasets[0].data = [noRutf, noSqlns, noQi, noRef, noMuac];
+  allCharts.gap.update();
+}
+
+function updateTables() {
+  // Nutrition table
+  const nutrTbody = document.getElementById('nutritionTable');
+  nutrTbody.innerHTML = '';
+  filteredFacilities.forEach(f => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${f.name}</td>
+      <td>${f.lga}</td>
+      <td>${f.plw_counselled}</td>
+      <td><span class="${f.iycn_materials ? 'status-yes' : 'status-no'}">${f.iycn_materials ? 'Yes' : 'No'}</span></td>
+      <td><span class="${f.rutf_available ? 'status-yes' : 'status-no'}">${f.rutf_available ? 'Yes' : 'No'}</span></td>
+      <td><span class="${f.muac_screening ? 'status-yes' : 'status-no'}">${f.muac_screening ? 'Yes' : 'No'}</span></td>
+    `;
+    nutrTbody.appendChild(tr);
+  });
+  
+  // ANC table
+  const ancTbody = document.getElementById('ancTable');
+  ancTbody.innerHTML = '';
+  filteredFacilities.forEach(f => {
+    const anc4Pct = f.anc1 > 0 ? ((f.anc4/f.anc1)*100).toFixed(1) : '0.0';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${f.name}</td>
+      <td>${f.lga}</td>
+      <td>${f.anc1}</td>
+      <td>${f.anc4}</td>
+      <td>${anc4Pct}%</td>
+      <td>${f.iptp3}</td>
+      <td><span class="${f.sp_available ? 'status-yes' : 'status-no'}">${f.sp_available ? 'Yes' : 'No'}</span></td>
+      <td><span class="${f.hiv_kits ? 'status-yes' : 'status-no'}">${f.hiv_kits ? 'Yes' : 'No'}</span></td>
+    `;
+    ancTbody.appendChild(tr);
+  });
+  
+  // Delivery table
+  const delTbody = document.getElementById('deliveryTable');
+  delTbody.innerHTML = '';
+  filteredFacilities.forEach(f => {
+    const uteroPct = f.deliveries > 0 ? ((f.uterotonics/f.deliveries)*100).toFixed(1) : '0.0';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${f.name}</td>
+      <td>${f.lga}</td>
+      <td>${f.deliveries}</td>
+      <td>${f.uterotonics}</td>
+      <td>${uteroPct}%</td>
+      <td><span class="${f.sba_available ? 'status-yes' : 'status-no'}">${f.sba_available ? 'Yes' : 'No'}</span></td>
+      <td><span class="${f.resus_equipment ? 'status-yes' : 'status-no'}">${f.resus_equipment ? 'Yes' : 'No'}</span></td>
+    `;
+    delTbody.appendChild(tr);
+  });
+  
+  // Quality table
+  const qualTbody = document.getElementById('qualityTable');
+  qualTbody.innerHTML = '';
+  filteredFacilities.forEach(f => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${f.name}</td>
+      <td>${f.lga}</td>
+      <td><span class="${f.mpcdsr_team ? 'status-yes' : 'status-no'}">${f.mpcdsr_team ? 'Yes' : 'No'}</span></td>
+      <td><span class="${f.qi_meeting ? 'status-yes' : 'status-no'}">${f.qi_meeting ? 'Yes' : 'No'}</span></td>
+      <td><span class="${f.referral_protocol ? 'status-yes' : 'status-no'}">${f.referral_protocol ? 'Yes' : 'No'}</span></td>
+      <td><span class="${f.dhis2_reporting ? 'status-yes' : 'status-no'}">${f.dhis2_reporting ? 'Yes' : 'No'}</span></td>
+    `;
+    qualTbody.appendChild(tr);
+  });
+  
+  // Gaps table
+  const gapsTbody = document.getElementById('gapsTableBody');
+  gapsTbody.innerHTML = '';
+  filteredFacilities.forEach(f => {
+    const tr = document.createElement('tr');
+    let ratingClass = 'status-critical';
+    let rating = 'Needs Support';
+    if (f.readiness >= 85) { ratingClass = 'status-excellent'; rating = 'Excellent'; }
+    else if (f.readiness >= 75) { ratingClass = 'status-good'; rating = 'Good'; }
+    else if (f.readiness >= 65) { ratingClass = 'status-fair'; rating = 'Fair'; }
+    
+    tr.innerHTML = `
+      <td>${f.name}</td>
+      <td>${f.lga}</td>
+      <td>${f.type.toUpperCase()}</td>
+      <td><span class="${f.rutf_available ? 'status-yes' : 'status-no'}">${f.rutf_available ? 'Yes' : 'No'}</span></td>
+      <td><span class="${f.sqlns_available ? 'status-yes' : 'status-no'}">${f.sqlns_available ? 'Yes' : 'No'}</span></td>
+      <td><span class="${f.qi_meeting ? 'status-yes' : 'status-no'}">${f.qi_meeting ? 'Yes' : 'No'}</span></td>
+      <td><span class="${f.referral_protocol ? 'status-yes' : 'status-no'}">${f.referral_protocol ? 'Yes' : 'No'}</span></td>
+      <td><span class="status-badge ${ratingClass}">${f.readiness.toFixed(1)}%</span></td>
+    `;
+    gapsTbody.appendChild(tr);
+  });
+  
+  // Facility table
+  const facTbody = document.getElementById('facilityTableBody');
+  facTbody.innerHTML = '';
+  const sortedFac = [...filteredFacilities].sort((a,b) => b.readiness - a.readiness);
+  sortedFac.forEach(f => {
+    let ratingClass = 'status-critical';
+    let rating = 'Needs Support';
+    if (f.readiness >= 85) { ratingClass = 'status-excellent'; rating = 'Excellent'; }
+    else if (f.readiness >= 75) { ratingClass = 'status-good'; rating = 'Good'; }
+    else if (f.readiness >= 65) { ratingClass = 'status-fair'; rating = 'Fair'; }
+    
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${f.name}</td>
+      <td>${f.lga}</td>
+      <td>${f.type.toUpperCase()}</td>
+      <td><strong>${f.readiness.toFixed(1)}%</strong></td>
+      <td><span class="status-badge ${ratingClass}">${rating}</span></td>
+      <td>${f.anc1}</td>
+      <td>${f.deliveries}</td>
+      <td><span class="${f.qi_meeting ? 'status-yes' : 'status-no'}">${f.qi_meeting ? 'Yes' : 'No'}</span></td>
+    `;
+    facTbody.appendChild(tr);
+  });
+}
+
+function switchTab(tabId, btn) {
+  document.querySelectorAll('.tab-panel').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tabId).classList.add('active');
+  btn.classList.add('active');
+  
+  if (tabId === 'gismap' && !window.mapInit) {
+    initMap();
+  }
+}
+
+function initMap() {
+  const map = L.map('mapContainer').setView([10.31, 9.84], 9);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap'
+  }).addTo(map);
+  
+  filteredFacilities.forEach(f => {
+    if (f.lat && f.lon) {
+      const color = f.readiness >= 85 ? '#1A8754' : 
+                    f.readiness >= 75 ? '#0E7C7B' :
+                    f.readiness >= 65 ? '#D4820A' : '#C0392B';
+      
+      L.circleMarker([f.lat, f.lon], {
+        radius: 8,
+        fillColor: color,
+        color: '#fff',
+        weight: 2,
+        opacity: 1,
+        fillOpacity: 0.8
+      }).addTo(map).bindPopup(`
+        <strong>${f.name}</strong><br>
+        <em>${f.lga} LGA</em><br>
+        Type: ${f.type.toUpperCase()}<br>
+        Readiness: <strong>${f.readiness.toFixed(1)}%</strong>
+      `);
+    }
+  });
+  
+  window.mapInit = true;
+}
+
+function sortPerf(order, el) {
+  document.querySelectorAll('.chart-filter-bar .cf-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  
+  let sorted = [...filteredFacilities];
+  if (order === 'desc') sorted.sort((a,b) => b.readiness - a.readiness);
+  else if (order === 'asc') sorted.sort((a,b) => a.readiness - b.readiness);
+  else sorted.sort((a,b) => a.name.localeCompare(b.name));
+  
+  allCharts.perf.data.labels = sorted.map(f => f.name.replace('ba ', ''));
+  allCharts.perf.data.datasets[0].data = sorted.map(f => f.readiness);
+  allCharts.perf.update();
+}
+</script>
+
+</body>
+</html>
