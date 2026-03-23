@@ -6,7 +6,6 @@
 <title>MNCH+N Capacity Strengthening Follow-Up Dashboard | EpiC Project</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
@@ -26,16 +25,6 @@ body{font-family:'DM Sans',sans-serif;background:#EEF1F7;color:var(--text);min-h
 .hdr-logo{width:52px;height:52px;border-radius:8px;background:#fff;padding:6px;object-fit:contain;}
 .hdr-titles h1{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:#fff;letter-spacing:.3px;line-height:1.2;}
 .hdr-titles p{font-size:11px;color:rgba(255,255,255,.65);margin-top:3px;letter-spacing:.4px;}
-.hdr-actions{display:flex;gap:7px;align-items:center;}
-.hdr-btn{background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);color:#fff;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all .3s;display:flex;align-items:center;gap:5px;letter-spacing:.3px;}
-.hdr-btn:hover{background:rgba(255,255,255,.25);border-color:rgba(255,255,255,.5);transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.15);}
-.hdr-btn.primary{background:var(--green);border-color:var(--green);}
-.hdr-btn.primary:hover{background:#1A9E5D;transform:translateY(-1px);box-shadow:0 4px 16px rgba(26,135,84,.4);}
-.hdr-btn.secondary{background:var(--blue);border-color:var(--blue);}
-.hdr-btn.secondary:hover{background:#2070BE;transform:translateY(-1px);box-shadow:0 4px 16px rgba(26,95,168,.4);}
-#fileInput{display:none;}
-.file-status{background:rgba(26,135,84,.2);border:1px solid rgba(26,135,84,.4);color:#fff;padding:4px 10px;border-radius:5px;font-size:10px;font-weight:600;display:none;}
-.file-status.show{display:block;}
 .hdr-badges{display:flex;gap:8px;}
 .badge{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.9);padding:5px 13px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:.5px;}
 .badge.gr{background:rgba(26,135,84,.35);border-color:rgba(26,135,84,.5);}
@@ -67,7 +56,7 @@ body{font-family:'DM Sans',sans-serif;background:#EEF1F7;color:var(--text);min-h
 .stag{background:var(--lgray);border:1px solid var(--mgray);padding:6px 15px;border-radius:6px;font-size:11px;font-weight:600;color:var(--dgray);letter-spacing:.5px;}
 
 /* GRID LAYOUTS */
-.g5,.g4,.g3,.g2{display:grid;gap:14px;margin-bottom:18px;}
+.g5,.g4,.g3,.g2{display:grid;gap:17px;margin-bottom:21px;}
 .g5{grid-template-columns:repeat(5,1fr);}
 .g4{grid-template-columns:repeat(4,1fr);}
 .g3{grid-template-columns:repeat(3,1fr);}
@@ -75,10 +64,10 @@ body{font-family:'DM Sans',sans-serif;background:#EEF1F7;color:var(--text);min-h
 .sp2{grid-column:span 2;}
 
 /* KPI CARDS */
-.kpi{background:linear-gradient(135deg,#fff 0%,#F9FAFB 100%);padding:14px 16px;border-radius:var(--cr);box-shadow:var(--sh);border:1px solid var(--mgray);}
-.kpi-lbl{font-size:10px;font-weight:600;color:var(--dgray);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;}
-.kpi-val{font-size:26px;font-weight:700;color:var(--navy);line-height:1;margin-bottom:5px;}
-.kpi-sub{font-size:11px;color:var(--dgray);font-weight:500;}
+.kpi{background:linear-gradient(135deg,#fff 0%,#F9FAFB 100%);padding:21px;border-radius:var(--cr);box-shadow:var(--sh);border:1px solid var(--mgray);}
+.kpi-lbl{font-size:11px;font-weight:600;color:var(--dgray);text-transform:uppercase;letter-spacing:.5px;margin-bottom:9px;}
+.kpi-val{font-size:33px;font-weight:700;color:var(--navy);line-height:1;margin-bottom:7px;}
+.kpi-sub{font-size:12px;color:var(--dgray);font-weight:500;}
 .kpi.G .kpi-val{color:var(--green);}
 .kpi.A .kpi-val{color:var(--amber);}
 .kpi.R .kpi-val{color:var(--red);}
@@ -86,11 +75,11 @@ body{font-family:'DM Sans',sans-serif;background:#EEF1F7;color:var(--text);min-h
 .kpi.T .kpi-val{color:var(--teal);}
 
 /* CARDS */
-.card{background:#fff;padding:18px;border-radius:var(--cr);box-shadow:var(--sh);border:1px solid var(--mgray);}
-.card-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-bottom:11px;border-bottom:1px solid var(--mgray);}
-.card-title-left{display:flex;align-items:center;gap:9px;font-weight:600;color:var(--navy);font-size:13px;}
-.dot{width:9px;height:9px;background:var(--blue);border-radius:50%;display:inline-block;}
-.n-badge{background:var(--lgray);padding:4px 10px;border-radius:6px;font-size:10px;font-weight:600;color:var(--dgray);}
+.card{background:#fff;padding:21px;border-radius:var(--cr);box-shadow:var(--sh);border:1px solid var(--mgray);}
+.card-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:17px;padding-bottom:13px;border-bottom:1px solid var(--mgray);}
+.card-title-left{display:flex;align-items:center;gap:9px;font-weight:600;color:var(--navy);font-size:14px;}
+.dot{width:10px;height:10px;background:var(--blue);border-radius:50%;display:inline-block;}
+.n-badge{background:var(--lgray);padding:5px 11px;border-radius:6px;font-size:11px;font-weight:600;color:var(--dgray);}
 
 /* CHART FILTERS */
 .chart-filter-bar{display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin-bottom:17px;padding:11px;background:var(--lgray);border-radius:8px;}
@@ -139,16 +128,6 @@ table tbody tr:hover{background:var(--lgray);}
         <h1>Follow-Up Visits & Health System Strengthening [MNCH+N]</h1>
         <p>EpiC Project | Activity Period March 2026</p>
       </div>
-    </div>
-    <div class="hdr-actions">
-      <input type="file" id="fileInput" accept=".xlsx,.xls" onchange="handleFileUpload(event)">
-      <button class="hdr-btn primary" onclick="document.getElementById('fileInput').click()">
-        📂 Import Data
-      </button>
-      <div class="file-status" id="fileStatus">✓ File loaded</div>
-      <button class="hdr-btn secondary" onclick="refreshDashboard()">
-        🔄 Refresh Dashboard
-      </button>
     </div>
     <div class="hdr-badges">
       <span class="badge" id="totalBadge">69 Facilities</span>
@@ -4018,190 +3997,6 @@ const FACILITIES = [
   }
 ];
 ;
-
-// ============================================================================
-// EXCEL UPLOAD AND DASHBOARD REFRESH FUNCTIONALITY
-// ============================================================================
-
-let FACILITIES_BACKUP = [...FACILITIES]; // Keep original data as backup
-
-/**
- * Handle Excel file upload
- */
-function handleFileUpload(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  
-  const fileStatus = document.getElementById('fileStatus');
-  fileStatus.textContent = '⏳ Loading...';
-  fileStatus.classList.add('show');
-  fileStatus.style.background = 'rgba(212,130,10,.2)';
-  fileStatus.style.borderColor = 'rgba(212,130,10,.4)';
-  
-  const reader = new FileReader();
-  
-  reader.onload = function(e) {
-    try {
-      const data = new Uint8Array(e.target.result);
-      const workbook = XLSX.read(data, {type: 'array'});
-      const sheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[sheetName];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet);
-      
-      if (jsonData.length === 0) {
-        throw new Error('No data found in Excel file');
-      }
-      
-      parseExcelData(jsonData);
-      
-      fileStatus.textContent = `✓ ${file.name} loaded`;
-      fileStatus.style.background = 'rgba(26,135,84,.2)';
-      fileStatus.style.borderColor = 'rgba(26,135,84,.4)';
-      
-      setTimeout(() => refreshDashboard(), 500);
-      
-    } catch (error) {
-      console.error('Error:', error);
-      fileStatus.textContent = '✗ Error loading';
-      fileStatus.style.background = 'rgba(192,57,43,.2)';
-      fileStatus.style.borderColor = 'rgba(192,57,43,.4)';
-      alert('Error loading file: ' + error.message);
-    }
-  };
-  
-  reader.readAsArrayBuffer(file);
-}
-
-/**
- * Parse Excel data
- */
-function parseExcelData(jsonData) {
-  FACILITIES.length = 0;
-  
-  jsonData.forEach((row, index) => {
-    try {
-      const facility = {
-        name: row['Facility Name'] || row['name'] || `Facility ${index + 1}`,
-        lga: row['LGA'] || row['lga'] || 'Unknown',
-        type: (row['Facility Type'] || row['type'] || 'phc').toLowerCase(),
-        readiness: parseFloat(row['Readiness Score'] || row['readiness'] || 0),
-        date: formatDate(row['Visit Date'] || row['date']),
-        facilitator: row['Facilitator'] || row['facilitator'] || '',
-        officer_in_charge: row['Officer in Charge'] || row['officer_in_charge'] || '',
-        lat: parseFloat(row['Latitude'] || row['lat'] || 0),
-        lon: parseFloat(row['Longitude'] || row['lon'] || 0),
-        iycn_materials: parseInt(row['IYCN Materials'] || 0),
-        plw_counselled: parseInt(row['PLW Counselled'] || 0),
-        sqlns_available: parseInt(row['SQLNS Available'] || 0),
-        sqlns_distributed: parseInt(row['SQLNS Distributed'] || 0),
-        rutf_available: parseInt(row['RUTF Available'] || 0),
-        muac_screening: parseInt(row['MUAC Screening'] || 0),
-        sam_receiving_rutf: parseInt(row['SAM Receiving RUTF'] || 0),
-        sam_cured: parseInt(row['SAM Cured'] || 0),
-        sam_referred: parseInt(row['SAM Referred'] || 0),
-        sam_defaulted: parseInt(row['SAM Defaulted'] || 0),
-        anc_register: parseInt(row['ANC Register'] || 0),
-        anc1: parseInt(row['ANC1'] || 0),
-        anc4: parseInt(row['ANC4'] || 0),
-        anc4_percentage: parseFloat(row['ANC4 Percentage'] || 0),
-        sp_available: parseInt(row['SP Available'] || 0),
-        iptp3: parseInt(row['IPTp3'] || 0),
-        hiv_kits: parseInt(row['HIV Kits'] || 0),
-        syphilis_kits: parseInt(row['Syphilis Kits'] || 0),
-        hiv_tested: parseInt(row['HIV Tested'] || 0),
-        syphilis_tested: parseInt(row['Syphilis Tested'] || 0),
-        syphilis_positive: parseInt(row['Syphilis Positive'] || 0),
-        syphilis_treated: parseInt(row['Syphilis Treated'] || 0),
-        sba_available: parseInt(row['SBA Available'] || 0),
-        deliveries: parseInt(row['Deliveries'] || 0),
-        uterotonics: parseInt(row['Uterotonics'] || 0),
-        resus_equipment: parseInt(row['Resus Equipment'] || 0),
-        newborns_resuscitated: parseInt(row['Newborns Resuscitated'] || 0),
-        non_breathing_newborns: parseInt(row['Non-breathing Newborns'] || 0),
-        resuscitation_rate: parseFloat(row['Resuscitation Rate'] || 0),
-        pnc_within_48hrs: parseInt(row['PNC Within 48hrs'] || 0),
-        ebf_children: parseInt(row['EBF Children'] || 0),
-        immunization_services: parseInt(row['Immunization Services'] || 0),
-        fully_immunized: parseInt(row['Fully Immunized'] || 0),
-        referral_protocol: parseInt(row['Referral Protocol'] || 0),
-        functional_linkages: parseInt(row['Functional Linkages'] || 0)
-      };
-      FACILITIES.push(facility);
-    } catch (error) {
-      console.error(`Error parsing row ${index + 1}:`, error);
-    }
-  });
-  
-  console.log(`✓ Loaded ${FACILITIES.length} facilities`);
-}
-
-/**
- * Format date
- */
-function formatDate(dateValue) {
-  if (!dateValue) return new Date().toISOString().split('T')[0];
-  if (typeof dateValue === 'number') {
-    const date = new Date((dateValue - 25569) * 86400 * 1000);
-    return date.toISOString().split('T')[0];
-  }
-  if (typeof dateValue === 'string') {
-    const date = new Date(dateValue);
-    if (!isNaN(date.getTime())) return date.toISOString().split('T')[0];
-  }
-  return new Date().toISOString().split('T')[0];
-}
-
-/**
- * Refresh dashboard
- */
-function refreshDashboard() {
-  console.log('🔄 Refreshing...');
-  
-  const fileStatus = document.getElementById('fileStatus');
-  const originalText = fileStatus.textContent;
-  fileStatus.textContent = '🔄 Refreshing...';
-  fileStatus.style.background = 'rgba(26,95,168,.2)';
-  
-  try {
-    currentFilters = {type:'all', facility:'all', lga:'all', date:'all'};
-    filteredFacilities = [...FACILITIES];
-    
-    Object.values(allCharts).forEach(chart => {
-      if (chart && typeof chart.destroy === 'function') chart.destroy();
-    });
-    allCharts = {};
-    
-    populateDropdowns();
-    initCharts();
-    updateDisplay();
-    
-    document.querySelectorAll('.chip').forEach(chip => {
-      chip.classList.remove('active');
-      if (chip.textContent.includes('All')) chip.classList.add('active');
-    });
-    
-    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-    document.querySelector('.nav-btn').classList.add('active');
-    
-    document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
-    document.getElementById('tab-overview').classList.add('active');
-    
-    setTimeout(() => {
-      fileStatus.textContent = '✓ Dashboard refreshed';
-      fileStatus.style.background = 'rgba(26,135,84,.2)';
-    }, 300);
-    
-    console.log('✓ Refresh complete');
-    
-  } catch (error) {
-    console.error('Error:', error);
-    fileStatus.textContent = '✗ Refresh error';
-    fileStatus.style.background = 'rgba(192,57,43,.2)';
-    alert('Error: ' + error.message);
-  }
-}
-
-// ============================================================================
 
 let filteredFacilities = [...FACILITIES];
 let currentFilters = {type:'all', facility:'all', lga:'all', date:'all'};
